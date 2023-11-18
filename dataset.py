@@ -10,6 +10,13 @@ from utils import compute_single_cls_ap
 
 class EnvDataset(Dataset):
     """
+    Returns:
+        traj1 states: (B, T, 3, 192, 256)
+        traj1 actions: (B, T)
+        traj1 ap: (B,)
+        traj2 states: (B, T, 3, 192, 256)
+        traj2 actions: (B, T)
+        traj2 ap: (B,)
     """
     def __init__(self, data_dir):
         self.traj_paths = [os.path.join(data_dir, traj_dir) for traj_dir in os.listdir(data_dir)]

@@ -8,7 +8,7 @@ import numpy as np
 
 from dataset import EnvDataset
 from utils import set_seed
-from model import RewardModel
+from model import ResNet18
 
 
 def get_args():
@@ -17,6 +17,8 @@ def get_args():
     parser.add_argument("--device", type=int, default=0, help="cpu if <0, or gpu id")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--obs_dim", type=int, default=3)
+    parser.add_argument("--act_dim", type=int, default=4)
     parser.add_argument("--lr", type=float, default=0.0003)
     parser.add_argument("--weight_decay", type=float, default=0.0005)
     parser.add_argument("--data_dir", type=str, default="/home/agent/Code/ackermann_car_nav/data/trajectories/policy_my")
@@ -28,7 +30,7 @@ def get_args():
 
 
 def train(args):
-    model = RewardModel(1, 4).to(args.device)
+    model = ResNet18(args.obs_dim, args.act_dim).to(args.device)
 
     train_dataloader = torch.utils.data.DataLoader(
         EnvDataset(args.data_dir), batch_size=args.batch_size, shuffle=True
