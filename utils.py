@@ -12,6 +12,44 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 
+def compute_recall(all_detections, all_annotations, iou_thres=0.5):
+    """
+    Inputs:
+        all_detections: shape=[N, K, 5]，每张图片有K个bbox，K可能=0
+        all_annotations: shape=[N, M, 4]，每张图片有M个bbox，M可能=0
+    Returns:
+        recall: TP/(TP+FN)
+    """
+    true_positives = []
+    num_annotations = 0
+    # 遍历batch张图片
+    for i in range(len(all_annotations)):
+        detections = all_detections[i]
+        annotations = all_annotations[i]
+        # 全部正例数量
+        num_annotations += annotations.shape[0]
+        detected_annotations = []
+        # 遍历每个pred bbox，将它归类为TP或者FP
+        for *bbox, score in detections:
+            if annotations.shape[0] == 0:
+                true_positives.append(0) # 当前box并非真正例
+                continue
+            overlaps = bbox_iou_numpy(np.array(bbox), annotations)
+            assigned_annotation = np.argmax(overlaps) # 获取最大交并比的下标
+            max_overlap = overlaps[assigned_annotation] # 获取最大交并比
+            if max_overlap >= iou_thres and assigned_annotation not in detected_annotations:
+                true_positives.append(1)
+                detected_annotations.append(assigned_annotation)
+            else:
+                true_positives.append(0)
+    # 如果没有物体出现在所有图片中, 在当前类的 recall 为 0
+    if num_annotations == 0:
+        recall = 0
+    else:
+        recall = np.sum(true_positives) / num_annotations
+    return recall
+
+
 def compute_single_cls_ap(all_detections, all_annotations, iou_thres=0.5):
     """
     Inputs:

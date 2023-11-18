@@ -5,7 +5,7 @@ import numpy as np
 import pickle
 import random
 
-from utils import compute_single_cls_ap
+from utils import compute_recall
 
 
 class EnvDataset(Dataset):
@@ -37,8 +37,8 @@ class EnvDataset(Dataset):
             actions[idx][sample[1]] = 1
             detections.append(sample[2])
             labels.append(sample[3])
-        ap = compute_single_cls_ap(detections, labels, iou_thres=0.5)
-        return states, actions, ap
+        recall = compute_recall(detections, labels, iou_thres=0.5)
+        return states, actions, recall
 
     def __getitem__(self, index):
         traj_path1 = self.traj_paths[index%len(self)]
